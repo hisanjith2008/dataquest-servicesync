@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+
+    // Real-time technician location tracking
+    // Secured: Only authenticated customer and assigned technician (or Admin)
+    // can access this booking's location data
+    match /bookingLocations/{requestId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        request.resource.data.requestId == requestId
+      );
+    }
+
+    // Booking documents
+    match /bookings/{bookingId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "bookingLocation": {
+      "title": "BookingLocation",
+      "description": "Real-time location and telemetry of an assigned technician for a service booking.",
+      "type": "object",
+      "properties": {
+        "requestId": { "type": "string", "description": "Identifier of the service request or booking" },
+        "technicianId": { "type": "string", "description": "Identifier of the assigned technician" },
+        "customerId": { "type": "string", "description": "Identifier of the customer who booked the service" },
+        "latitude": { "type": "number", "description": "Current latitude of the technician" },
+        "longitude": { "type": "number", "description": "Current longitude of the technician" },
+        "heading": { "type": "number", "description": "Current heading/bearing in degrees" },
+        "speed": { "type": "number", "description": "Current speed in m/s if available" },
+        "accuracy": { "type": "number", "description": "GPS accuracy in meters" },
+        "status": {
+          "type": "string",
+          "enum": ["Booked", "Accepted", "On the way", "Arrived", "Completed"],
+          "description": "Current active booking status"
+        },
+        "etaMinutes": { "type": "number", "description": "Calculated driving ETA in minutes" },
+        "distanceKm": { "type": "number", "description": "Driving distance in kilometers" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "ISO timestamp of the location update" }
+      },
+      "required": ["requestId", "technicianId", "customerId", "latitude", "longitude", "status", "timestamp"]
+    },
+    "booking": {
+      "title": "Booking",
+      "description": "Service booking details and status lifecycle.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique booking identifier" },
+        "customerId": { "type": "string", "description": "Identifier of the customer" },
+        "technicianId": { "type": "string", "description": "Assigned technician identifier" },
+        "status": {
+          "type": "string",
+          "enum": ["Booked", "Accepted", "On the way", "Arrived", "Completed"],
+          "description": "Lifecycle state of the booking"
+        },
+        "customerAddress": { "type": "string", "description": "Customer service address" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["id", "customerId", "status", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/bookingLocations/{requestId}": {
+      "schema": { "$ref": "#/entities/bookingLocation" },
+      "description": "Real-time technician location updates scoped per booking request ID"
+    },
+    "/bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/booking" },
+      "description": "Booking records synchronized between customer and technician"
+    }
+  }
+}
